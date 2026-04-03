@@ -1,0 +1,39 @@
+<h3>Delete Item</h3>
+
+@if (errorMessage != null)
+{
+<div class="alert alert-danger">
+  {{errorMessage}}
+</div>
+}
+
+@if (item != null)
+{
+<h4>Confirm that you want to delete this item.</h4>
+
+<dl class="row">
+  <dt class="col-sm-2">
+    Product Code
+  </dt>
+  <dd class="col-sm-10">
+    {{item.productCode}}
+  </dd>
+  <dt class="col-sm-2">
+    Name
+  </dt>
+  <dd class="col-sm-10">
+    {{item.name}}
+  </dd>
+  <dt class="col-sm-2">
+    Quantity
+  </dt>
+  <dd class="col-sm-10">
+    {{item.quantity | number}}
+  </dd>
+</dl>
+
+<div class="mb-3">
+  <button type="submit" class="btn btn-danger me-1" (click)="delete()">Delete</button>
+  <a class="btn btn-secondary ms-1" routerLink="/items">Cancel</a>
+</div>
+}

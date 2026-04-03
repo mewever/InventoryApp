@@ -1,0 +1,151 @@
+﻿@page "/items/receive/{id}"
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+
+<h3>Receive Inventory for Item</h3>
+
+@if (errorMessage != null)
+{
+    <div class="alert alert-danger">
+        @errorMessage
+    </div>
+}
+
+@if (item != null)
+{
+    <EditForm Model="item" OnValidSubmit="ReceiveInventory">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <dl class="row">
+            <dt class="col-sm-2">
+                Product Code
+            </dt>
+            <dd class="col-sm-10">
+                @item.ProductCode
+            </dd>
+            <dt class="col-sm-2">
+                Name
+            </dt>
+            <dd class="col-sm-10">
+                @item.Name
+            </dd>
+            <dt class="col-sm-2">
+                Quantity
+            </dt>
+            <dd class="col-sm-10">
+                @item.Quantity.ToString("#,##0")
+            </dd>
+        </dl>
+
+        <div class="mb-3">
+            <label class="form-label" for="referenceNumber">Reference Number</label>
+            <InputText id="referenceNumber" class="form-control" @bind-Value="referenceNumber" />
+            <ValidationMessage For="@(() => referenceNumber)" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="description">Description</label>
+            <InputText id="description" class="form-control" @bind-Value="description" />
+            <ValidationMessage For="@(() => description)" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="quantityReceived">Quantity Received</label>
+            <InputNumber id="quantityReceived" class="form-control" @bind-Value="quantityReceived" />
+            <ValidationMessage For="@(() => quantityReceived)" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="amountPaid">Amount Paid</label>
+            <InputNumber id="amountPaid" class="form-control" @bind-Value="amountPaid" />
+            <ValidationMessage For="@(() => amountPaid)" />
+        </div>
+
+        <div class="mb-3">
+            <button type="submit" class="btn btn-primary">Save</button>
+            <button type="button" class="btn btn-secondary" @onclick="CancelReceive">Cancel</button>
+        </div>
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public string id { get; set; } = string.Empty;
+
+    private InventoryItem? item = null;
+    private string referenceNumber = string.Empty;
+    private string description = string.Empty;
+    private int quantityReceived = 0;
+    private decimal amountPaid = 0;
+    private string? errorMessage = null;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        errorMessage = null; // Reset error message before loading
+        // Parse the string parameter into an integer ID
+        if (!int.TryParse(id, out int itemId))
+        {
+            errorMessage = "Invalid item ID.";
+            return;
+        }
+        InventoryItemDetailsRequest request = new InventoryItemDetailsRequest { Id = itemId };
+        var response = await HttpClient.PostAsJsonAsync("api/items/details", request);
+        if (response.IsSuccessStatusCode)
+        {
+            var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponse<InventoryItem>>();
+            if (apiResponse?.IsSuccessful == true)
+            {
+                item = apiResponse.Response;
+            }
+            else
+            {
+                errorMessage = "Failed to load item details.";
+            }
+        }
+        else
+        {
+            errorMessage = "Failed to load item details.";
+        }
+    }
+
+    private async Task ReceiveInventory()
+    {
+        if (item == null)
+        {
+            return;
+        }
+        errorMessage = null; // Reset error message before loading
+        ReceiveInventoryRequest request = new ReceiveInventoryRequest()
+            {
+                InventoryItemId = item.Id,
+                ReferenceNumber = referenceNumber,
+                Description = description,
+                QuantityReceived = quantityReceived,
+                AmountPaid = amountPaid
+            };
+        var response = await HttpClient.PostAsJsonAsync("api/items/receive", request);
+        if (response.IsSuccessStatusCode)
+        {
+            var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponse>();
+            if (apiResponse?.IsSuccessful == true)
+            {
+                NavigationManager.NavigateTo($"/items");
+                return;
+            }
+            else
+            {
+                errorMessage = "Failed to receive the inventory.";
+            }
+        }
+        else
+        {
+            errorMessage = "Failed to receive the inventory.";
+        }
+    }
+
+    private void CancelReceive()
+    {
+        NavigationManager.NavigateTo($"/items");
+    }
+}

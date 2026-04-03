@@ -1,0 +1,82 @@
+﻿@page "/items"
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+
+<h3>Items</h3>
+
+@if (errorMessage != null)
+{
+    <div class="alert alert-danger">
+        @errorMessage
+    </div>
+}
+<div class="mb-3">
+    <button class="btn btn-primary" @onclick="AddItem">Add Item</button>
+</div>
+
+@foreach (var item in items)
+{
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title">@item.Name</h5>
+            <div class="card-text">Product Code: @item.ProductCode</div>
+            <div class="card-text">Quantity: @item.Quantity</div>
+            <div>
+                <button class="btn btn-primary" @onclick="()=>EditItem(item)">Edit</button>
+                <button class="btn btn-primary" @onclick="() => ItemDetails(item)">Details</button>
+                <button class="btn btn-primary" @onclick="() => DeleteItem(item)">Delete</button>
+                <button class="btn btn-primary" @onclick="() => ReceiveItem(item)">Receive</button>
+                <button class="btn btn-primary" @onclick="() => RemoveItem(item)">Remove</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<InventoryItem> items = [];
+    private string? errorMessage = null;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        errorMessage = null; // Reset error message before loading
+        var response = await HttpClient.GetFromJsonAsync<ApiResponse<List<InventoryItem>>>("api/items/list");
+        if (response?.IsSuccessful == true)
+        {
+            items = response.Response ?? [];
+        }
+        else
+        {
+            errorMessage = "Failed to load items.";
+        }
+    }
+
+    private void AddItem()
+    {
+        NavigationManager.NavigateTo($"/items/add");
+    }
+
+    private void EditItem(InventoryItem item)
+    {
+        NavigationManager.NavigateTo($"/items/edit/{item.Id}");
+    }
+
+    private void ItemDetails(InventoryItem item)
+    {
+        NavigationManager.NavigateTo($"/items/details/{item.Id}");
+    }
+
+    private void DeleteItem(InventoryItem item)
+    {
+        NavigationManager.NavigateTo($"/items/delete/{item.Id}");
+    }
+
+    private void ReceiveItem(InventoryItem item)
+    {
+        NavigationManager.NavigateTo($"/items/receive/{item.Id}");
+    }
+
+    private void RemoveItem(InventoryItem item)
+    {
+        NavigationManager.NavigateTo($"/items/remove/{item.Id}");
+    }
+}

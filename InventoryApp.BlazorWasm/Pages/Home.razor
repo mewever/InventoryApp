@@ -1,0 +1,27 @@
+﻿@page "/"
+@using InventoryApp.Shared.ApiModels
+@using InventoryApp.Shared.Data
+@inject HttpClient Http
+
+
+<PageTitle>Home</PageTitle>
+
+<div class="text-center">
+    <h1 class="display-4">Welcome To My Sample Inventory System</h1>
+    <h2>This is the Blazor WebAssembly Interface</h2>
+</div>
+
+<NavLink href="items">Items</NavLink>
+
+@code {
+    private List<InventoryItem> items = [];
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var response = await Http.GetFromJsonAsync<ApiResponse<List<InventoryItem>>>("api/items/list");
+        if (response?.IsSuccessful == true)
+        {
+            items = response.Response ?? [];
+        }
+    }
+}

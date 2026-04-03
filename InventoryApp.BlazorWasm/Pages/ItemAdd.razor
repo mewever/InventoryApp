@@ -1,0 +1,70 @@
+﻿@page "/items/add"
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+
+<h3>New Item</h3>
+
+@if (errorMessage != null)
+{
+    <div class="alert alert-danger">
+        @errorMessage
+    </div>
+}
+
+@if (item != null)
+{
+    <EditForm Model="item" OnValidSubmit="SaveItem">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label class="form-label" for="productCode">Product Code</label>
+            <InputText id="productCode" class="form-control" @bind-Value="item.ProductCode" />
+            <ValidationMessage For="@(() => item.ProductCode)" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="name">Name</label>
+            <InputText id="name" class="form-control" @bind-Value="item.Name" />
+            <ValidationMessage For="@(() => item.ProductCode)" />
+        </div>
+
+        <div class="mb-3">
+            <button type="submit" class="btn btn-primary">Save</button>
+            <button type="button" class="btn btn-secondary" @onclick="CancelAdd">Cancel</button>
+        </div>
+    </EditForm>
+}
+
+@code {
+    private InventoryItem item = new InventoryItem();
+    private string? errorMessage = null;
+
+    private async Task SaveItem()
+    {
+        errorMessage = null; // Reset error message before loading
+        var response = await HttpClient.PostAsJsonAsync("api/items/add", item);
+        if (response.IsSuccessStatusCode)
+        {
+            var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponse>();
+            if (apiResponse?.IsSuccessful == true)
+            {
+                NavigationManager.NavigateTo($"/items");
+                return;
+            }
+            else
+            {
+                errorMessage = "Failed to add the item.";
+            }
+        }
+        else
+        {
+            errorMessage = "Failed to add the item.";
+        }
+    }
+
+    private void CancelAdd()
+    {
+        NavigationManager.NavigateTo($"/items");
+    }
+}

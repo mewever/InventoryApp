@@ -1,0 +1,235 @@
+﻿@page "/items/details/{id}"
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+
+<h3>Item</h3>
+
+<div class="mb-3">
+    <button type="button" class="btn btn-secondary" @onclick="GoBack">Back</button>
+</div>
+
+@if (errorMessage != null)
+{
+    <div class="alert alert-danger">
+        @errorMessage
+    </div>
+}
+
+@if (item != null)
+{
+    <dl class="row">
+        <dt class="col-sm-2">
+            Product Code
+        </dt>
+        <dd class="col-sm-10">
+            @item.ProductCode
+        </dd>
+        <dt class="col-sm-2">
+            Name
+        </dt>
+        <dd class="col-sm-10">
+            @item.Name
+        </dd>
+        <dt class="col-sm-2">
+            Quantity
+        </dt>
+        <dd class="col-sm-10">
+            @item.Quantity.ToString("#,##0")
+        </dd>
+    </dl>
+}
+
+@if (itemWithCosts == null)
+{
+    <div class="mb-3">
+        <button type="button" class="btn btn-primary" @onclick="GetCosts">See Costs</button>
+    </div>
+}
+else
+{
+    <h4>Costs</h4>
+    <table class="border mb-3">
+        <thead>
+            <tr class="border-bottom">
+                <th class="px-1">Received</th>
+                <th class="text-end px-1">Quantity</th>
+                <th class="text-end px-1">Total Cost</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (itemWithCosts.Costs == null || itemWithCosts.Costs.Count == 0)
+            {
+                <tr>
+                    <td colspan="3" class="px-1">No costs for this product.</td>
+                </tr>
+            }
+            else
+            {
+                foreach (var cost in itemWithCosts.Costs)
+                {
+                    <tr>
+                        <td class="px-1">@cost.ReceivedTimestamp.ToShortDateString() @cost.ReceivedTimestamp.ToShortTimeString()</td>
+                        <td class="text-end px-1">@cost.CurrentQuantity?.ToString("#,##0")</td>
+                        <td class="text-end px-1">@cost.CurrentCost.ToString("$#,##0.00")</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+}
+
+@if (itemWithHistory == null)
+{
+    <div class="mb-3">
+        <button type="button" class="btn btn-primary" @onclick="GetHistory">See History</button>
+    </div>
+}
+else
+{
+    <h4>History</h4>
+    <table class="border mb-3">
+        <thead>
+            <tr>
+                <th class="px-1 border-start border-top border-end"></th>
+                <th colspan="3" class="text-center px-1 border-start border-top border-end">Inventory</th>
+                <th colspan="3" class="text-center px-1 border-start border-top border-end">Cost Record</th>
+            </tr>
+            <tr class="border-bottom">
+                <th class="px-1 border-start border-end">Date</th>
+                <th class="px-1 border-start">Reference</th>
+                <th class="text-end px-1">Quantity</th>
+                <th class="text-end px-1 border-end">Cost</th>
+                <th class="px-1 border-start">Date</th>
+                <th class="text-end px-1">Quantity</th>
+                <th class="text-end px-1 border-end">Unit Cost</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (itemWithHistory.ListItems == null || itemWithHistory.ListItems.Count == 0)
+            {
+                <tr>
+                    <td colspan="7" class="px-1">No history for this product.</td>
+                </tr>
+            }
+            else
+            {
+                foreach (var listItem in itemWithHistory.ListItems)
+                {
+                    <tr>
+                        <td class="px-1 border-start border-end">@listItem.HistoryDate?.ToShortDateString() @listItem.HistoryDate?.ToShortTimeString()</td>
+                        <td class="px-1 border-start">@listItem.ReferenceNumber</td>
+                        <td class="text-end px-1">@(listItem.HistoryQuantity == 0 ? "" : listItem.HistoryQuantity.ToString("#,##0"))</td>
+                        <td class="text-end px-1 border-end">@(listItem.HistoryCost == 0 ? "" : listItem.HistoryCost.ToString("$#,##0.00"))</td>
+                        <td class="px-1 border-start">@listItem.CostDate.ToShortDateString() @listItem.CostDate.ToShortTimeString()</td>
+                        <td class="text-end px-1">@listItem.CostQuantity.ToString("#,##0")</td>
+                        <td class="text-end px-1 border-end">@listItem.CostUnitCost.ToString("$#,##0.00")</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    [Parameter]
+    public string id { get; set; } = string.Empty;
+
+    private InventoryItem? item = null;
+    private InventoryItemWithCosts? itemWithCosts = null;
+    private InventoryItemWithHistory? itemWithHistory = null;
+    private string? errorMessage = null;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        errorMessage = null; // Reset error message before loading
+        // Parse the string parameter into an integer ID
+        if (!int.TryParse(id, out int itemId))
+        {
+            errorMessage = "Invalid item ID.";
+            return;
+        }
+        InventoryItemDetailsRequest request = new InventoryItemDetailsRequest { Id = itemId };
+        var response = await HttpClient.PostAsJsonAsync("api/items/details", request);
+        if (response.IsSuccessStatusCode)
+        {
+            var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponse<InventoryItem>>();
+            if (apiResponse?.IsSuccessful == true)
+            {
+                item = apiResponse.Response;
+            }
+            else
+            {
+                errorMessage = "Failed to load item details.";
+            }
+        }
+        else
+        {
+            errorMessage = "Failed to load item details.";
+        }
+    }
+
+    private async Task GetCosts()
+    {
+        if (item == null)
+        {
+            return;
+        }
+        errorMessage = null; // Reset error message before loading
+        InventoryItemCostsRequest request = new InventoryItemCostsRequest { Id = item.Id };
+        var response = await HttpClient.PostAsJsonAsync("api/items/costs", request);
+        if (response.IsSuccessStatusCode)
+        {
+            System.Text.Json.JsonSerializerOptions options = new System.Text.Json.JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+            var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponse<InventoryItemWithCosts>>(options);
+            if (apiResponse?.IsSuccessful == true)
+            {
+                itemWithCosts = apiResponse.Response;
+                return;
+            }
+            else
+            {
+                errorMessage = "Failed to load the item costs.";
+            }
+        }
+        else
+        {
+            errorMessage = "Failed to load the item costs.";
+        }
+    }
+
+    private async Task GetHistory()
+    {
+        if (item == null)
+        {
+            return;
+        }
+        errorMessage = null; // Reset error message before loading
+        InventoryItemHistoryRequest request = new InventoryItemHistoryRequest { Id = item.Id };
+        var response = await HttpClient.PostAsJsonAsync("api/items/history", request);
+        if (response.IsSuccessStatusCode)
+        {
+            var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponse<InventoryItemWithHistory>>();
+            if (apiResponse?.IsSuccessful == true)
+            {
+                itemWithHistory = apiResponse.Response;
+                return;
+            }
+            else
+            {
+                errorMessage = "Failed to update the item.";
+            }
+        }
+        else
+        {
+            errorMessage = "Failed to update the item.";
+        }
+    }
+
+    private void GoBack()
+    {
+        NavigationManager.NavigateTo($"/items");
+    }
+}

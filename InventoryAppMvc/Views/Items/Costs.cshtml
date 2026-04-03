@@ -1,0 +1,64 @@
+﻿@model InventoryApp.Shared.Models.InventoryItemWithCosts
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>Inventory Item Costs</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.ProductCode)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.ProductCode)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Name)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Quantity)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Quantity)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.TotalCost)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.TotalCost)
+        </dd>
+    </dl>
+
+    <table>
+        <thead>
+            <tr>
+                <th class="px-1">Received</th>
+                <th class="text-end px-1">Quantity</th>
+                <th class="text-end px-1">Total Cost</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Costs != null)
+            {
+                foreach (var cost in Model.Costs)
+                {
+                    <tr>
+                        <td class="px-1">@cost.ReceivedTimestamp.ToShortDateString() @cost.ReceivedTimestamp.ToShortTimeString()</td>
+                        <td class="text-end px-1">@cost.CurrentQuantity?.ToString("#,##0")</td>
+                        <td class="text-end px-1">@cost.CurrentCost.ToString("$#,##0.00")</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>

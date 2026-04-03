@@ -1,0 +1,9 @@
+<Solution>
+  <Project Path="InventoryApp.Angular/InventoryApp.Angular.esproj">
+    <Build />
+    <Deploy />
+  </Project>
+  <Project Path="InventoryApp.BlazorWasm/InventoryApp.BlazorWasm.csproj" Id="a56084b1-3ee2-45d1-8bfc-760965360bc0" />
+  <Project Path="InventoryApp.Shared/InventoryApp.Shared.csproj" />
+  <Project Path="InventoryAppMvc/InventoryAppMvc.csproj" />
+</Solution>

@@ -1,0 +1,57 @@
+<h3>Receive Inventory</h3>
+
+@if (errorMessage != null)
+{
+<div class="alert alert-danger">
+  {{errorMessage}}
+</div>
+}
+
+@if (item != null)
+{
+<dl class="row">
+  <dt class="col-sm-2">
+    Product Code
+  </dt>
+  <dd class="col-sm-10">
+    {{item.productCode}}
+  </dd>
+  <dt class="col-sm-2">
+    Name
+  </dt>
+  <dd class="col-sm-10">
+    {{item.name}}
+  </dd>
+  <dt class="col-sm-2">
+    Quantity
+  </dt>
+  <dd class="col-sm-10">
+    {{item.quantity | number}}
+  </dd>
+</dl>
+
+<div class="mb-3">
+  <label class="form-label" for="referenceNumber">Reference Number</label>
+  <input type="text" id="referenceNumber" class="form-control" [(ngModel)]="referenceNumber" />
+</div>
+
+<div class="mb-3">
+  <label class="form-label" for="description">Description</label>
+  <input type="text" id="description" class="form-control" [(ngModel)]="description" />
+</div>
+
+<div class="mb-3">
+  <label class="form-label" for="quantityReceived">Quantity Received</label>
+  <input type="number" id="quantityReceived" class="form-control" [(ngModel)]="quantityReceived" />
+</div>
+
+<div class="mb-3">
+  <label class="form-label" for="amountPaid">Amount Paid</label>
+  <input type="number" id="amountPaid" class="form-control" [(ngModel)]="amountPaid" />
+</div>
+
+<div class="mb-3">
+  <button type="submit" class="btn btn-primary me-1" (click)="save()">Save</button>
+  <a class="btn btn-secondary ms-1" routerLink="/items">Cancel</a>
+</div>
+}

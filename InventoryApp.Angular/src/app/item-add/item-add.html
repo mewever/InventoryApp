@@ -1,0 +1,26 @@
+<h3>New Item</h3>
+
+@if (errorMessage != null)
+{
+<div class="alert alert-danger">
+  {{errorMessage}}
+</div>
+}
+
+@if (item != null)
+{
+<div class="mb-3">
+  <label class="form-label" for="productCode">Product Code</label>
+  <input type="text" id="productCode" class="form-control" [(ngModel)]="item.productCode" />
+</div>
+
+<div class="mb-3">
+  <label class="form-label" for="name">Name</label>
+  <input type="text" id="name" class="form-control" [(ngModel)]="item.name" />
+</div>
+
+<div class="mb-3">
+  <button type="submit" class="btn btn-primary me-1" (click)="save()">Save</button>
+  <a class="btn btn-secondary ms-1" routerLink="/items">Cancel</a>
+</div>
+}

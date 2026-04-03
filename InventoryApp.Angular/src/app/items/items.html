@@ -1,0 +1,25 @@
+<h3>Items</h3>
+
+<div class="mb-3">
+  <a class="btn btn-primary" routerLink="/items/add">Add Item</a>
+</div>
+
+@if (inventoryItems) {
+@for (item of inventoryItems; track item.id) {
+<div class="card mb-3">
+  <div class="card-body">
+    <h5 class="card-title">{{item.name}}</h5>
+    <div class="card-text">Product Code: {{item.productCode}}</div>
+    <div class="card-text">Quantity: {{item.quantity}}</div>
+    <div>
+      <a class="btn btn-primary me-1" [routerLink]="['/items/edit', item.id]">Edit</a>
+      <a class="btn btn-primary mx-1" [routerLink]="['/items/details', item.id]">Details</a>
+      <a class="btn btn-danger mx-1" [routerLink]="['/items/delete', item.id]">Delete</a>
+      <a class="btn btn-secondary mx-1" [routerLink]="['/items/receive', item.id]">Receive</a>
+      <a class="btn btn-secondary ms-1" [routerLink]="['/items/remove', item.id]">Remove</a>
+    </div>
+  </div>
+</div>
+}
+}
+
