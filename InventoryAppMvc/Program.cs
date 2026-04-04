@@ -15,7 +15,8 @@ builder.Services.AddCors(options =>
                       {
                           policy.WithOrigins(
                               "https://localhost:7007", // Blazor WASM client
-                              "http://localhost:52976" // Angular client
+                              "http://localhost:52976", // Angular client
+                              "http://localhost:54862" // React client
                               )
                           .AllowAnyHeader()
                           .WithMethods("POST");
