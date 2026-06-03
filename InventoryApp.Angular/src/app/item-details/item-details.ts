@@ -18,7 +18,7 @@ export class ItemDetails {
 
   constructor(private inventoryItemsService: InventoryItemsService) {
     // Get the id from the route parameter
-    var idParm = this.route.snapshot.paramMap.get('id');
+    const idParm = this.route.snapshot.paramMap.get('id');
     if (idParm != null) {
       this.inventoryItemId = +idParm;
     }

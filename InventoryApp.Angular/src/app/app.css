@@ -1,5 +1,18 @@
 main {
-  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100dvh - 135px); /* Min height will be viewport height less the known vertical size of the header and footer */
+  margin: 0;
+}
+
+/*
+nav {
+    background-color: cornflowerblue !important;
+}
+*/
+
+content {
+    flex: 1
 }
 
 @media (max-width: 640.98px) {
@@ -12,8 +25,6 @@ main {
 }
 
 .footer {
-  position: absolute;
-  bottom: 0;
   width: 100%;
   white-space: nowrap;
   line-height: 60px;
